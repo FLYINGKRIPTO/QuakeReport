@@ -29,8 +29,7 @@ import java.util.List;
 
 public class EarthquakeActivity extends AppCompatActivity {
     private static final String LOG_TAG = EarthquakeActivity.class.getName();
-    private static final String USGS_REQUEST_URL =
-            "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&eventtype=earthquake&orderby=time&minmag=6&limit=10";
+    private static final String USGS_REQUEST_URL ="https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&orderby=time&minmag=5&limit=10";
     private EarthquakeAdapter mAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +80,7 @@ public class EarthquakeActivity extends AppCompatActivity {
         }
        protected void onPostExecute(List<Earthquake> data){
             mAdapter.clear();
-            if(data!=null && data.isEmpty()){
+            if(data!=null || data.isEmpty()){
                 mAdapter.addAll(data);
             }
        }
