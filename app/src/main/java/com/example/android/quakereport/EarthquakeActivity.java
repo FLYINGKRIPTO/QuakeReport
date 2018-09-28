@@ -26,6 +26,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -113,30 +114,35 @@ else {
     @Override
     public Loader<List<Earthquake>> onCreateLoader(int id, Bundle args) {
         {
-
+            Log.e(LOG_TAG, "onCreateLoader: in OnCreateLoader " );
             SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
             // getString retrieves a String value from the preferences. The second parameter is the default value for this preference.
             String minMagnitude = sharedPrefs.getString(
                     getString(R.string.settings_min_magnitude_key),
                     getString(R.string.settings_min_magnitude_default));
+            Log.e(LOG_TAG, "onCreateLoader: getStringMethod done");
 
             // parse breaks apart the URI string that's passed into its parameter
             Uri baseUri = Uri.parse(USGS_REQUEST_URL);
+            Log.e(LOG_TAG, "onCreateLoader: parse method done " );
 
             // buildUpon prepares the baseUri that we just parsed so we can add query parameters to it
             Uri.Builder uriBuilder = baseUri.buildUpon();
-
+            Log.e(LOG_TAG, "onCreateLoader: uriBuilder method started" );
             // Append query parameter and its value. For example, the `format=geojson`
             uriBuilder.appendQueryParameter("format", "geojson");
-            uriBuilder.appendQueryParameter("limit", "10");
-            uriBuilder.appendQueryParameter("minmag", minMagnitude);
             uriBuilder.appendQueryParameter("orderby", "time");
+            uriBuilder.appendQueryParameter("minmag", minMagnitude);
+            uriBuilder.appendQueryParameter("limit", "10");
 
+
+            Log.e(LOG_TAG, "onCreateLoader: uriBuilder Method done" );
             // Return the completed uri `http://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&limit=10&minmag=minMagnitude&orderby=time
             return new EarthquakeLoader(this, uriBuilder.toString());
 
         }
+
     }
 
     @Override
