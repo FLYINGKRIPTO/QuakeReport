@@ -38,11 +38,11 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EarthquakeActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<Earthquake>>{
+public class EarthquakeActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<Earthquake>>,SharedPreferences.OnSharedPreferenceChangeListener{
     private static final String LOG_TAG = EarthquakeActivity.class.getName();
     private static final int EARTHQUAKE_LOADER_ID = 1;
     private TextView mEmptyStateTextView;
-    private static final String USGS_REQUEST_URL ="http://earthquake.usgs.gov/fdsnws/event/1/query";
+    private static final String USGS_REQUEST_URL ="https://earthquake.usgs.gov/fdsnws/event/1/query";
     private EarthquakeAdapter mAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +70,10 @@ else {
         // Set the adapter on the {@link ListView}
         // so the list can be populated in the user interface
         earthquakeListView.setAdapter(mAdapter);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        // And register to be notified of preference changes
+        // So we know when the user has adjusted the query settings
+        prefs.registerOnSharedPreferenceChangeListener(this);
 
 
         earthquakeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -94,22 +98,6 @@ else {
 
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu,menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id =item.getItemId();
-        if(id==R.id.action_settings){
-            Intent settingsIntent = new Intent(this, SettingsActivity.class);
-            startActivity(settingsIntent);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
 
     @Override
     public Loader<List<Earthquake>> onCreateLoader(int id, Bundle args) {
@@ -151,12 +139,19 @@ else {
 
     @Override
     public void onLoadFinished(Loader<List<Earthquake>> loader, List<Earthquake> earthquakes) {
-        mAdapter.clear();
+        View loadingIndicator = findViewById(R.id.progressBar);
+        loadingIndicator.setVisibility(View.GONE);
+
+        // Set empty state text to display "No earthquakes found."
+        mEmptyStateTextView.setText(R.string.no_earthquakes);
+
+        //  mAdapter.clear();
 
         // If there is a valid list of {@link Earthquake}s, then add them to the adapter's
         // data set. This will trigger the ListView to update.
         if (earthquakes != null && !earthquakes.isEmpty()) {
-            mAdapter.addAll(earthquakes);
+           // mAdapter.addAll(earthquakes);
+            updateData(earthquakes);
         }
 
 
@@ -166,6 +161,10 @@ else {
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);
         progressBar.setVisibility(View.INVISIBLE);
 
+    }
+
+    private void updateData(List<Earthquake> earthquakes) {
+        mAdapter.addAll(earthquakes);
     }
 
     @Override
@@ -192,4 +191,39 @@ else {
             }
         }
     }*/
+
+@Override
+public boolean onCreateOptionsMenu(Menu menu) {
+    getMenuInflater().inflate(R.menu.menu,menu);
+    return true;
 }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            Intent settingsIntent = new Intent(this, SettingsActivity.class);
+            startActivity(settingsIntent);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(getString(R.string.settings_min_magnitude_key)) ||
+                key.equals(getString(R.string.settings_order_by_key))){
+            // Clear the ListView as a new query will be kicked off
+            mAdapter.clear();
+            // Hide the empty state text view as the loading indicator will be displayed
+            mEmptyStateTextView.setVisibility(View.GONE);
+            // Show the loading indicator while new data is being fetched
+            View loadingIndicator = findViewById(R.id.progressBar);
+            loadingIndicator.setVisibility(View.VISIBLE);
+            // Restart the loader to requery the USGS as the query settings have been updated
+            getLoaderManager().restartLoader(EARTHQUAKE_LOADER_ID, null, this);
+
+        }
+}}
+
+
