@@ -61,7 +61,7 @@ public final class QueryUtils {
 
     }
     private static String makeHttpRequest(URL url) throws IOException{
-        String jsonResponse = " ";
+        String jsonResponse ="";
         if(url == null){
             return jsonResponse;
         }

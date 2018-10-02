@@ -124,9 +124,11 @@ else {
             Log.e(LOG_TAG, "onCreateLoader: uriBuilder method started" );
             // Append query parameter and its value. For example, the `format=geojson`
             uriBuilder.appendQueryParameter("format", "geojson");
-            uriBuilder.appendQueryParameter("orderby", "orderBy");
-            uriBuilder.appendQueryParameter("minmag", minMagnitude);
             uriBuilder.appendQueryParameter("limit", "10");
+            uriBuilder.appendQueryParameter("minmag", minMagnitude);
+            uriBuilder.appendQueryParameter("orderby", orderBy);
+
+
 
 
             Log.e(LOG_TAG, "onCreateLoader: uriBuilder Method done" );
@@ -139,8 +141,7 @@ else {
 
     @Override
     public void onLoadFinished(Loader<List<Earthquake>> loader, List<Earthquake> earthquakes) {
-        View loadingIndicator = findViewById(R.id.progressBar);
-        loadingIndicator.setVisibility(View.GONE);
+
 
         // Set empty state text to display "No earthquakes found."
         mEmptyStateTextView.setText(R.string.no_earthquakes);
